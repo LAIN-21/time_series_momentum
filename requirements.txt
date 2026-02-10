@@ -1,0 +1,12 @@
+numpy
+pandas
+matplotlib
+seaborn
+jupyter
+scipy
+statsmodels
+scikit-learn
+numba
+riskfolio-lib
+yfinance
+tqdm
