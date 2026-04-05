@@ -40,10 +40,19 @@ def load_yahoo_close(ticker: str, data_dir: str = "data/daily", refresh: bool = 
 
     return px
 
-def daily_to_month_end(px: pd.Series) -> pd.Series:
-    px = px.dropna().sort_index()
+def daily_to_month_end(px: pd.Series | pd.DataFrame) -> pd.Series | pd.DataFrame:
+    px = px.sort_index()
+
+    if isinstance(px, pd.DataFrame):
+        px = px.dropna(how="all")
+    else:
+        px = px.dropna()
+
     px_m = px.resample("ME").last()
-    px_m.name = "month_end_price"
+
+    if isinstance(px_m, pd.Series):
+        px_m.name = "month_end_price"
+
     return px_m
 
 def month_end_to_returns(px_m: pd.Series) -> pd.Series:

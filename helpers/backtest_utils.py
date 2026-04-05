@@ -2,11 +2,15 @@ import pandas as pd
 import numpy as np
 
 def position_from_signal(signal: pd.Series, lag: int = 1) -> pd.Series:
+    if lag < 0:
+        raise ValueError("lag must be >= 0")
     position = signal.shift(lag)
     position.name = "position"
     return position
 
 def strategy_returns(position: pd.Series, asset_returns: pd.Series) -> pd.Series:
+    # Align on the intersection of dates to avoid accidental misalignment.
+    position, asset_returns = position.align(asset_returns, join="inner")
     strat_r = position * asset_returns
     strat_r.name = "strategy_return"
     return strat_r

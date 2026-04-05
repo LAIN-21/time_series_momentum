@@ -1,2 +1,9 @@
 venv/
 data/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+helpers/__pycache__/
