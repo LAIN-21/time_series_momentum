@@ -89,3 +89,118 @@ def plot_tsmom_diagnostics(
 
     plt.tight_layout()
     plt.show()
+
+
+def plot_cumulative_comparison(
+    return_map: dict[str, pd.Series],
+    title: str = "Cumulative growth of $1",
+    figsize: tuple = (10, 5),
+):
+    fig, ax = plt.subplots(figsize=figsize)
+    for name, ret in return_map.items():
+        cum = cumulative_returns(ret, name=name)
+        ax.plot(cum.index, cum.values, label=name)
+    ax.set_title(title)
+    ax.set_ylabel("Growth of $1")
+    ax.grid(True, alpha=0.3)
+    ax.legend()
+    plt.tight_layout()
+    plt.show()
+    return fig, ax
+
+
+def plot_drawdown_comparison(
+    return_map: dict[str, pd.Series],
+    title: str = "Drawdowns",
+    figsize: tuple = (10, 4),
+):
+    fig, ax = plt.subplots(figsize=figsize)
+    for name, ret in return_map.items():
+        cum = cumulative_returns(ret, name=name)
+        dd = drawdown(cum)
+        ax.plot(dd.index, dd.values, label=name)
+    ax.set_title(title)
+    ax.set_ylabel("Drawdown")
+    ax.grid(True, alpha=0.3)
+    ax.legend()
+    plt.tight_layout()
+    plt.show()
+    return fig, ax
+
+
+def plot_metric_bars(
+    series: pd.Series,
+    title: str,
+    ylabel: str = "",
+    figsize: tuple = (10, 4),
+    color: str = "steelblue",
+    hline: float | None = None,
+):
+    fig, ax = plt.subplots(figsize=figsize)
+    s = series.dropna().sort_values()
+    s.plot(kind="barh", ax=ax, color=color)
+    if hline is not None:
+        ax.axvline(hline, color="black", linestyle="--", linewidth=1, alpha=0.7)
+    ax.set_title(title)
+    if ylabel:
+        ax.set_xlabel(ylabel)
+    ax.grid(True, axis="x", alpha=0.3)
+    plt.tight_layout()
+    plt.show()
+    return fig, ax
+
+
+def plot_scatter_metrics(
+    df: pd.DataFrame,
+    x: str,
+    y: str,
+    label_col: str | None = None,
+    title: str = "",
+    figsize: tuple = (8, 5),
+    annotate: bool = True,
+):
+    fig, ax = plt.subplots(figsize=figsize)
+    ax.scatter(df[x], df[y], s=40, alpha=0.8)
+    if annotate:
+        labels = df.index if label_col is None else df[label_col]
+        for i, lab in enumerate(labels):
+            ax.annotate(
+                str(lab),
+                (df[x].iloc[i], df[y].iloc[i]),
+                fontsize=7,
+                alpha=0.85,
+                xytext=(4, 4),
+                textcoords="offset points",
+            )
+    ax.set_xlabel(x)
+    ax.set_ylabel(y)
+    ax.set_title(title or f"{y} vs {x}")
+    ax.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.show()
+    return fig, ax
+
+
+def plot_score_and_price(
+    price: pd.Series,
+    score: pd.Series,
+    title: str = "Price and multi-horizon score",
+    figsize: tuple = (11, 5),
+):
+    fig, ax1 = plt.subplots(figsize=figsize)
+    ax1.plot(price.index, price.values, color="black", label="Price", linewidth=1.2)
+    ax1.set_ylabel("Price")
+    ax1.grid(True, alpha=0.3)
+
+    ax2 = ax1.twinx()
+    ax2.fill_between(score.index, score.values, 0, alpha=0.25, color="steelblue")
+    ax2.plot(score.index, score.values, color="steelblue", alpha=0.8, label="Score")
+    ax2.axhline(0, color="gray", linewidth=0.8)
+    ax2.set_ylabel("Score")
+    ax2.set_ylim(-1.2, 1.2)
+
+    ax1.set_title(title)
+    fig.legend(loc="upper left")
+    plt.tight_layout()
+    plt.show()
+    return fig, (ax1, ax2)
