@@ -1,0 +1,10 @@
+{
+  "spy_best": "single_12m",
+  "spy_best_sharpe_net": 0.7110243445626303,
+  "spy_12m_sharpe_net": 0.7110243445626303,
+  "spy_eq_full_sharpe_net": 0.5452090641490397,
+  "ew_best": "single_12m",
+  "ew_best_sharpe_net": 0.8996663845240507,
+  "ew_12m_sharpe_net": 0.8996663845240507,
+  "ew_eq_full_sharpe_net": 0.7427626856192429
+}

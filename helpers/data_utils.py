@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pandas as pd
 import yfinance as yf
 from pathlib import Path
@@ -55,7 +57,23 @@ def daily_to_month_end(px: pd.Series | pd.DataFrame) -> pd.Series | pd.DataFrame
 
     return px_m
 
-def month_end_to_returns(px_m: pd.Series) -> pd.Series:
+def month_end_to_returns(px_m: pd.Series | pd.DataFrame) -> pd.Series | pd.DataFrame:
     r_m = px_m.pct_change()
-    r_m.name = "asset_return"
+    if isinstance(r_m, pd.Series):
+        r_m.name = "asset_return"
     return r_m
+
+
+def load_monthly_panel(
+    tickers: list[str],
+    data_dir: str = "data/daily",
+    refresh: bool = False,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Load cached Yahoo closes and return (month-end prices, monthly returns)."""
+    daily = {
+        t: load_yahoo_close(t, data_dir=data_dir, refresh=refresh) for t in tickers
+    }
+    daily_px = pd.concat(daily, axis=1)
+    px_m = daily_to_month_end(daily_px)
+    r_m = month_end_to_returns(px_m)
+    return px_m, r_m
