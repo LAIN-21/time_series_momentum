@@ -39,10 +39,12 @@ def _weighted_mean(
             raise ValueError("weights must sum to a positive number")
         weights = {k: weights[k] / w_sum for k in keys}
 
-    total = None
-    for k in keys:
-        piece = pieces[k].astype(float) * weights[k]
-        total = piece if total is None else total.add(piece, fill_value=np.nan)
+    # Sum weighted terms with ordinary `+` so any missing horizon stays NaN.
+    # Do not fill missing with 0: that would treat "not ready yet" as flat and
+    # bias early months (warmup) or sparse assets toward zero conviction.
+    total = pieces[keys[0]].astype(float) * weights[keys[0]]
+    for k in keys[1:]:
+        total = total + pieces[k].astype(float) * weights[k]
     return total
 
 
@@ -91,10 +93,11 @@ def majority_vote(
     if not signals:
         raise ValueError("signals must be a non-empty dict")
 
-    total = None
-    for sig in signals.values():
-        piece = sig.astype(float)
-        total = piece if total is None else total.add(piece, fill_value=np.nan)
+    # Same NaN policy as `_weighted_mean`: require every horizon to be present.
+    vals = list(signals.values())
+    total = vals[0].astype(float)
+    for sig in vals[1:]:
+        total = total + sig.astype(float)
 
     vote = np.sign(total)
     if min_agree is not None:
